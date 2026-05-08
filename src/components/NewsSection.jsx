@@ -164,10 +164,10 @@ function ArticleCard({ article, theme, index }) {
       style={{ animationDelay: `${index * 80}ms` }}
     >
       {/* Image */}
-      {article.urlToImage && (
+      {article.image && (
         <div className="h-40 overflow-hidden">
           <img
-            src={article.urlToImage}
+            src={article.image}
             alt={article.title || 'Article image'}
             className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
             loading="lazy"
@@ -177,7 +177,7 @@ function ArticleCard({ article, theme, index }) {
       )}
 
       {/* Colored top bar when no image */}
-      {!article.urlToImage && (
+      {!article.image && (
         <div
           className="h-2 rounded-t-xl"
           style={{

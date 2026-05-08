@@ -43,7 +43,7 @@ export function useNews() {
       }
 
       const res = await fetch(
-        `https://newsapi.org/v2/top-headlines?country=us&pageSize=10&apiKey=${API_KEY}`
+        `https://gnews.io/api/v4/top-headlines?category=general&lang=en&country=us&max=10&apikey=${API_KEY}`
       );
       if (!res.ok) throw new Error('Failed to fetch news');
       const data = await res.json();
@@ -56,6 +56,7 @@ export function useNews() {
       );
       setLoading(false);
     } catch (err) {
+      console.error('News fetch error:', err);
       setError(err.message);
       setLoading(false);
     }
@@ -120,7 +121,7 @@ function generateMockNews() {
     title: getHeadline(i),
     description: getDescription(i),
     url: `https://example.com/article-${i + 1}`,
-    urlToImage: null,
+    image: null,
     publishedAt: new Date(Date.now() - i * 3600000).toISOString(),
     content: `Full content for article ${i + 1}...`,
     category: categories[i % categories.length],
