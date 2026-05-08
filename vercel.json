@@ -7,6 +7,14 @@
     {
       "source": "/api/nominatim/:path*",
       "destination": "https://nominatim.openstreetmap.org/:path*"
+    },
+    {
+      "source": "/api/ai/:path*",
+      "destination": "https://api-inference.huggingface.co/:path*"
+    },
+    {
+      "source": "/api/news/:path*",
+      "destination": "https://gnews.io/:path*"
     }
   ]
 }

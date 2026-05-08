@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 const AI_TOKEN = import.meta.env.VITE_AI_TOKEN;
 const MODEL_URL =
-  'https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2';
+  '/api/ai/models/mistralai/Mistral-7B-Instruct-v0.2';
 const STORAGE_KEY = 'chatbot-messages';
 const MAX_MESSAGES = 30;
 

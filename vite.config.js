@@ -16,6 +16,16 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/nominatim/, ''),
       },
+      '/api/ai': {
+        target: 'https://api-inference.huggingface.co',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/ai/, ''),
+      },
+      '/api/news': {
+        target: 'https://gnews.io',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/api\/news/, ''),
+      },
     },
   },
 })

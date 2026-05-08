@@ -43,7 +43,7 @@ export function useNews() {
       }
 
       const res = await fetch(
-        `https://api.allorigins.win/raw?url=${encodeURIComponent(`https://gnews.io/api/v4/top-headlines?category=general&lang=en&country=us&max=10&apikey=${API_KEY}`)}`
+        `/api/news/api/v4/top-headlines?category=general&lang=en&country=us&max=10&apikey=${API_KEY}`
       );
       if (!res.ok) throw new Error('Failed to fetch news');
       const data = await res.json();
