@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 
-const ISS_POSITION_URL = 'https://api.allorigins.win/raw?url=http://api.open-notify.org/iss-now.json';
-const ISS_ASTROS_URL = 'https://api.allorigins.win/raw?url=http://api.open-notify.org/astros.json';
-const NOMINATIM_URL = 'https://nominatim.openstreetmap.org/reverse';
+const ISS_POSITION_URL = '/api/iss/iss-now.json';
+const ISS_ASTROS_URL = '/api/iss/astros.json';
+const NOMINATIM_URL = '/api/nominatim/reverse';
 const POLL_INTERVAL = 15000;
 const MAX_TRAJECTORY = 15;
 const MAX_SPEED_HISTORY = 30;
