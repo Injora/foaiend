@@ -61,11 +61,9 @@ RULES:
         }
 
         const systemPrompt = buildSystemPrompt();
-        const recentMessages = messages.slice(-10);
+        console.log('Chatbot system prompt built with context:', { issData: !!issData, newsCount: newsHeadlines?.length || 0 });
 
-        const prompt = `<s>[INST] ${systemPrompt}\n\n${recentMessages
-          .map(m => (m.role === 'user' ? `User: ${m.content}` : `Assistant: ${m.content}`))
-          .join('\n')}\nUser: ${userMessage} [/INST]`;
+        const prompt = `<s>[INST] ${systemPrompt} [/INST] User: ${userMessage} Assistant: `;
 
         abortRef.current = new AbortController();
 
@@ -90,12 +88,16 @@ RULES:
           signal: abortRef.current.signal,
         });
 
+        console.log('AI Response Status:', res.status);
+
         if (!res.ok) {
           const errText = await res.text();
+          console.error('AI Error Body:', errText);
           throw new Error(`API error: ${res.status} - ${errText}`);
         }
 
         const data = await res.json();
+        console.log('AI Response Data:', data);
         let reply = data[0]?.generated_text || 'I am restricted to dashboard data only.';
         reply = reply.trim();
 
