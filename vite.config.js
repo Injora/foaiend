@@ -17,7 +17,7 @@ export default defineConfig({
         rewrite: (path) => path.replace(/^\/api\/nominatim/, ''),
       },
       '/api/ai': {
-        target: 'https://api-inference.huggingface.co',
+        target: 'https://router.huggingface.co',
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/api\/ai/, ''),
       },

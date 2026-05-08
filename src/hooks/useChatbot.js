@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 const AI_TOKEN = import.meta.env.VITE_AI_TOKEN;
-const MODEL_URL =
-  '/api/ai/models/mistralai/Mistral-7B-Instruct-v0.2';
+const MODEL_URL = '/api/ai/v1/chat/completions';
+const AI_MODEL = 'meta-llama/Meta-Llama-3-8B-Instruct';
 const STORAGE_KEY = 'chatbot-messages';
 const MAX_MESSAGES = 30;
 
@@ -56,7 +56,6 @@ RULES:
         if (AI_TOKEN && AI_TOKEN !== 'your_huggingface_token_here') {
           try {
             const systemPrompt = buildSystemPrompt();
-            const prompt = `<s>[INST] ${systemPrompt} [/INST] User: ${userMessage} Assistant: `;
 
             abortRef.current = new AbortController();
 
@@ -67,16 +66,14 @@ RULES:
                 'Content-Type': 'application/json',
               },
               body: JSON.stringify({
-                inputs: prompt,
-                parameters: {
-                  max_new_tokens: 300,
-                  temperature: 0.7,
-                  top_p: 0.9,
-                  return_full_text: false,
-                },
-                options: {
-                  wait_for_model: true,
-                },
+                model: AI_MODEL,
+                messages: [
+                  { role: 'system', content: systemPrompt },
+                  { role: 'user', content: userMessage },
+                ],
+                max_tokens: 300,
+                temperature: 0.7,
+                top_p: 0.9,
               }),
               signal: abortRef.current.signal,
             });
@@ -86,7 +83,7 @@ RULES:
             if (res.ok) {
               const data = await res.json();
               console.log('AI Response Data:', data);
-              reply = data[0]?.generated_text?.trim();
+              reply = data.choices?.[0]?.message?.content?.trim();
             } else {
               const errText = await res.text();
               console.warn('AI API unavailable, using smart fallback. Status:', res.status, errText);
