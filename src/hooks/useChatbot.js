@@ -83,12 +83,16 @@ RULES:
               top_p: 0.9,
               return_full_text: false,
             },
+            options: {
+              wait_for_model: true,
+            },
           }),
           signal: abortRef.current.signal,
         });
 
         if (!res.ok) {
-          throw new Error(`API error: ${res.status}`);
+          const errText = await res.text();
+          throw new Error(`API error: ${res.status} - ${errText}`);
         }
 
         const data = await res.json();
@@ -99,6 +103,7 @@ RULES:
         setMessages(prev => [...prev, botMsg]);
       } catch (err) {
         if (err.name === 'AbortError') return;
+        console.error('Chatbot fetch error:', err);
         const errMsg = {
           role: 'assistant',
           content: 'Sorry, I encountered an error. Please try again.',
