@@ -50,62 +50,64 @@ RULES:
       setIsTyping(true);
 
       try {
-        if (!AI_TOKEN || AI_TOKEN === 'your_huggingface_token_here') {
-          // Fallback: simulate AI response based on keywords
-          await new Promise(r => setTimeout(r, 1000));
-          const response = generateFallbackResponse(userMessage, issData, newsHeadlines);
-          const botMsg = { role: 'assistant', content: response, timestamp: Date.now() };
-          setMessages(prev => [...prev, botMsg]);
-          setIsTyping(false);
-          return;
+        let reply = null;
+
+        // Try HuggingFace API if token is available
+        if (AI_TOKEN && AI_TOKEN !== 'your_huggingface_token_here') {
+          try {
+            const systemPrompt = buildSystemPrompt();
+            const prompt = `<s>[INST] ${systemPrompt} [/INST] User: ${userMessage} Assistant: `;
+
+            abortRef.current = new AbortController();
+
+            const res = await fetch(MODEL_URL, {
+              method: 'POST',
+              headers: {
+                Authorization: `Bearer ${AI_TOKEN}`,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                inputs: prompt,
+                parameters: {
+                  max_new_tokens: 300,
+                  temperature: 0.7,
+                  top_p: 0.9,
+                  return_full_text: false,
+                },
+                options: {
+                  wait_for_model: true,
+                },
+              }),
+              signal: abortRef.current.signal,
+            });
+
+            console.log('AI Response Status:', res.status);
+
+            if (res.ok) {
+              const data = await res.json();
+              console.log('AI Response Data:', data);
+              reply = data[0]?.generated_text?.trim();
+            } else {
+              const errText = await res.text();
+              console.warn('AI API unavailable, using smart fallback. Status:', res.status, errText);
+            }
+          } catch (aiErr) {
+            if (aiErr.name === 'AbortError') return;
+            console.warn('AI API error, using smart fallback:', aiErr.message);
+          }
         }
 
-        const systemPrompt = buildSystemPrompt();
-        console.log('Chatbot system prompt built with context:', { issData: !!issData, newsCount: newsHeadlines?.length || 0 });
-
-        const prompt = `<s>[INST] ${systemPrompt} [/INST] User: ${userMessage} Assistant: `;
-
-        abortRef.current = new AbortController();
-
-        const res = await fetch(MODEL_URL, {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${AI_TOKEN}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            inputs: prompt,
-            parameters: {
-              max_new_tokens: 300,
-              temperature: 0.7,
-              top_p: 0.9,
-              return_full_text: false,
-            },
-            options: {
-              wait_for_model: true,
-            },
-          }),
-          signal: abortRef.current.signal,
-        });
-
-        console.log('AI Response Status:', res.status);
-
-        if (!res.ok) {
-          const errText = await res.text();
-          console.error('AI Error Body:', errText);
-          throw new Error(`API error: ${res.status} - ${errText}`);
+        // Smart fallback: always works with live dashboard data
+        if (!reply) {
+          await new Promise(r => setTimeout(r, 600));
+          reply = generateFallbackResponse(userMessage, issData, newsHeadlines);
         }
-
-        const data = await res.json();
-        console.log('AI Response Data:', data);
-        let reply = data[0]?.generated_text || 'I am restricted to dashboard data only.';
-        reply = reply.trim();
 
         const botMsg = { role: 'assistant', content: reply, timestamp: Date.now() };
         setMessages(prev => [...prev, botMsg]);
       } catch (err) {
         if (err.name === 'AbortError') return;
-        console.error('Chatbot fetch error:', err);
+        console.error('Chatbot error:', err);
         const errMsg = {
           role: 'assistant',
           content: 'Sorry, I encountered an error. Please try again.',
